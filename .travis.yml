@@ -1,0 +1,9 @@
+language: java
+sudo: false # faster builds
+osx_image: xcode12.2
+
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+notifications:
+  email: skuratov-2000@mail.ru
