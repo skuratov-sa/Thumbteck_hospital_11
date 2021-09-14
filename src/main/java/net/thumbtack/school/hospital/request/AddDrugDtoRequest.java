@@ -1,13 +1,13 @@
 package net.thumbtack.school.hospital.request;
 
-import net.thumbtack.school.hospital.model.Drug;
+import net.thumbtack.school.hospital.response.DrugDto;
 
 public class AddDrugDtoRequest {
-    private String token;
-    private int idPatient;
-    private Drug drug;
+    private final String token;
+    private final int idPatient;
+    private final DrugDto drug;
 
-    public AddDrugDtoRequest(String token, int idPatient, Drug drug) {
+    public AddDrugDtoRequest(String token, int idPatient, DrugDto drug) {
         this.token = token;
         this.idPatient = idPatient;
         this.drug = drug;
@@ -17,23 +17,12 @@ public class AddDrugDtoRequest {
         return token;
     }
 
-    public void setToken(String token) {
-        this.token = token;
-    }
-
     public int getIdPatient() {
         return idPatient;
     }
 
-    public void setIdPatient(int idPatient) {
-        this.idPatient = idPatient;
-    }
-
-    public Drug getDrug() {
+    public DrugDto getDrug() {
         return drug;
     }
 
-    public void setDrug(Drug drug) {
-        this.drug = drug;
-    }
 }

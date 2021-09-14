@@ -25,15 +25,6 @@ public class PatientDaoImpl implements PatientDao {
         return DataBase.getInstance().getDrugForPatient(patient);
     }
 
-    @Override
-    public User getInfo(String token) throws ServerException {
-        return DataBase.getInstance().getByTokenUser(token);
-    }
-
-    @Override
-    public User getByLoginPatient(int id) throws ServerException {
-        return DataBase.getInstance().getByIdUser(id);
-    }
 
     @Override
     public User getByTokenPatient(String token) throws ServerException {

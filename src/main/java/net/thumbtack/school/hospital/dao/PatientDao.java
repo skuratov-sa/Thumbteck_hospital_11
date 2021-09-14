@@ -13,8 +13,6 @@ public interface PatientDao {
 
     Doctor getDoctorInfoFromPatient(Patient patient) throws ServerException;
     Collection<String> getDirections(Patient patient);
-    User getByLoginPatient(int id) throws ServerException;
     User getByTokenPatient(String token) throws ServerException;
     List<Drug> getDrug(Patient patient);
-    User getInfo(String token) throws ServerException;
 }

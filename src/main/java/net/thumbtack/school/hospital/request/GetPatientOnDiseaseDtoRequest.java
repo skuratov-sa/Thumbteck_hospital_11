@@ -1,8 +1,8 @@
 package net.thumbtack.school.hospital.request;
 
 public class GetPatientOnDiseaseDtoRequest {
-    private String token;
-    private String disease;
+    private final String token;
+    private final String disease;
 
     public GetPatientOnDiseaseDtoRequest(String token, String disease) {
         this.token = token;
@@ -13,16 +13,8 @@ public class GetPatientOnDiseaseDtoRequest {
         return token;
     }
 
-    public void setToken(String token) {
-        this.token = token;
-    }
-
     public String getDisease() {
         return disease;
-    }
-
-    public void setDisease(String disease) {
-        this.disease = disease;
     }
 
 }

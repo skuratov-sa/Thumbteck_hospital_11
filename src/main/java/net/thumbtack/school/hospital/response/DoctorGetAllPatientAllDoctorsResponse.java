@@ -2,13 +2,13 @@ package net.thumbtack.school.hospital.response;
 import java.util.List;
 
 public class DoctorGetAllPatientAllDoctorsResponse {
-    private final List<PatientInfoDtoRequest> patientInfo;
+    private final List<PatientDto> patientInfo;
 
-    public DoctorGetAllPatientAllDoctorsResponse(List<PatientInfoDtoRequest> patientInfo) {
+    public DoctorGetAllPatientAllDoctorsResponse(List<PatientDto> patientInfo) {
         this.patientInfo = patientInfo;
     }
 
-    public List<PatientInfoDtoRequest> getPatientInfo() {
+    public List<PatientDto> getPatientInfo() {
         return patientInfo;
     }
 }

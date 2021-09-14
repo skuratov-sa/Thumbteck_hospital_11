@@ -1,7 +1,7 @@
 package net.thumbtack.school.hospital.request;
 
 public class GetListPatientDtoRequest {
-    private String token;
+    private final String token;
 
     public GetListPatientDtoRequest(String token) {
         this.token = token;
@@ -9,9 +9,5 @@ public class GetListPatientDtoRequest {
 
     public String getToken() {
         return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 }

@@ -372,7 +372,7 @@ public class DataBaseTest {
         }
 
         try {
-            ArrayList<Doctor> map = db.getAllPatientAllDoctors();
+            ArrayList<Doctor> map = (ArrayList<Doctor>) db.getAllPatientAllDoctors();
             Assert.assertEquals(doctor.getLogin(),map.get(0).getLogin());
             Assert.assertEquals(2,map.get(0).getPatients().size());
 

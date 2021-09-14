@@ -37,6 +37,11 @@ public class Server implements Serializable {
         return docService.regPatient(jsonText);
     }
 
+    //Регестрация клиента через доктора с указанием лекарства
+    public String regPatientWithDrug(String jsonText) {
+        return docService.regPatientWithDrug(jsonText);
+    }
+
     //Доктор добавляет направление для клиента
     public String addDestinationForPatient(String jsonText){ return docService.addDestination(jsonText);}
 
@@ -50,19 +55,25 @@ public class Server implements Serializable {
 
     public String delDrugForPatient(String jsonText){return  docService.delDrug(jsonText);}
 
+    //Получить  информацию о докторе по токену
+    public String getInfoDoctorByToken(String jsonToken){return docService.getInfo(jsonToken);}
+
     //Доктор получает всех своих клиентов с указанием болезни
     public String getPatientWithDiseaseServerFromDoctorServer(String textJson) { return docService.getDoctorToPatientWithDisease(textJson); }
 
     //Доктор получает всех своих клиентов получивших некоторое направление
     public String getPatientWithDirectionsServerFromDoctorServer(String textJson) { return docService.getDoctorToPatientWithDirections(textJson); }
 
+    public String getPatientListByDrug(String jsonText){return docService.getPatientListByDrug(jsonText);}
+
     //Удаление клиента через доктора
     public String delPatientServer(String jsonText) {
         return docService.delPatient(jsonText);
     }
 
+
     //Доктор получает всех своих пациентов
-    public String gePatientFromDoctorServer(String textJson) {
+    public String getPatientFromDoctorServer(String textJson) {
         return docService.getListPatientsFromDoctor(textJson);
     }
 
@@ -81,24 +92,22 @@ public class Server implements Serializable {
         return patientService.getDirections(JsonToken);
     }
 
+    //Получить  информацию о пациенте по токену
+    public String getInfoPatientByToken(String jsonToken){return patientService.getInfo(jsonToken);}
+
     //User
     //Обновление пароля у пользователя
     public String updatePasswordUserServer(String jsonText){return userService.updatePassUser(jsonText);}
 
-    //Вход пользователя
+    //Вход
     public String logInUser(String jsonText) {
         return userService.logInUser(jsonText);
     }
 
-    //Выход доктора
+    //Выход
     public String logOutUser(String jsonToken) {
         return userService.logOutUser(jsonToken);
     }
-
-    public String getInfoDoctorByToken(String jsonToken){return docService.getInfo(jsonToken);}
-
-    public String getInfoPatientByToken(String jsonToken){return patientService.getInfo(jsonToken);}
-
 
     public void  clear(){
         docService.debugService();

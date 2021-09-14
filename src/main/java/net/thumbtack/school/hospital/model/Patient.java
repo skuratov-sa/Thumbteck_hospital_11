@@ -7,10 +7,8 @@ import java.util.Objects;
 
 public class Patient extends User implements Serializable {
     private final String diseaseName;
-    private List<String> directionsList = new ArrayList<>();
+    private final List<String> directionsList = new ArrayList<>();
     private final List<Drug> drugList = new ArrayList<>();
-    // REVU лучше 
-    // private Doctor doctor;
     private Doctor doctor;
 
     public Patient(String firstName, String lastName, String nameDisease, String login, String password) {
@@ -36,10 +34,6 @@ public class Patient extends User implements Serializable {
 
     public void setDrugList(Drug drug) { drugList.add(drug); }
 
-    public void setDirectionsList(List<String> directionsList) {
-        this.directionsList = directionsList;
-    }
-
     public Doctor getDoctor() {
         return doctor;
     }
@@ -55,7 +49,6 @@ public class Patient extends User implements Serializable {
         Patient patient = (Patient) o;
         return  Objects.equals(getLogin(),patient.getLogin()) && Objects.equals(getPassword(),patient.getPassword());
     }
-
     @Override
     public int hashCode() {
         return Objects.hash(getLogin(),getPassword());

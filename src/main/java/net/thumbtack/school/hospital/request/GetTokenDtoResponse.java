@@ -1,11 +1,12 @@
 package net.thumbtack.school.hospital.request;
 
-public class DelDoctorDtoRequest {
+public class GetTokenDtoResponse {
     private final String token;
 
-    public DelDoctorDtoRequest(String token) {
+    public GetTokenDtoResponse(String token) {
         this.token = token;
     }
+
     public String getToken() {
         return token;
     }

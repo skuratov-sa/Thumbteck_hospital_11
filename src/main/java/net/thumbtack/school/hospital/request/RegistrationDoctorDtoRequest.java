@@ -6,8 +6,6 @@ public class RegistrationDoctorDtoRequest {
     private String speciality;
     private String login;
     private String password;
-    private String token;
-    private String directions;
 
     public RegistrationDoctorDtoRequest(String firstName, String lastName, String speciality, String login, String password) {
         this.firstName = firstName;
@@ -21,9 +19,7 @@ public class RegistrationDoctorDtoRequest {
         return firstName;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
 
     public String getLastName() {
         return lastName;
@@ -58,19 +54,4 @@ public class RegistrationDoctorDtoRequest {
     }
 
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public String getDirections() {
-        return directions;
-    }
-
-    public void setDirections(String directions) {
-        this.directions = directions;
-    }
 }

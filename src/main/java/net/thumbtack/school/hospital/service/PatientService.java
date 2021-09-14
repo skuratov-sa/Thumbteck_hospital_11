@@ -5,12 +5,13 @@ import com.google.gson.JsonSyntaxException;
 import net.thumbtack.school.hospital.daoimpl.PatientDaoImpl;
 import net.thumbtack.school.hospital.exeptions.AnswerErrorCode;
 import net.thumbtack.school.hospital.exeptions.ServerException;
+import net.thumbtack.school.hospital.model.User;
 import net.thumbtack.school.hospital.request.GetInfoUserDtoRequest;
 import net.thumbtack.school.hospital.response.*;
 import net.thumbtack.school.hospital.model.Doctor;
 import net.thumbtack.school.hospital.model.Drug;
 import net.thumbtack.school.hospital.model.Patient;
-import net.thumbtack.school.hospital.request.GetUserByTokenDtoRequest;
+import net.thumbtack.school.hospital.request.GetTokenDtoResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ public class PatientService {
 
     public String getDoctorInfoFromPatient(String jsonText) {
         try {
-            GetUserByTokenDtoRequest tokenDto = getClassFromJson(jsonText, GetUserByTokenDtoRequest.class);
+            GetTokenDtoResponse tokenDto = getClassFromJson(jsonText, GetTokenDtoResponse.class);
             validateGetDoctorInfoFromPatientRequest(tokenDto);
 
             Patient patient = getPatientByToken(tokenDto.getToken());
@@ -34,16 +35,9 @@ public class PatientService {
     }
 
 
-    private void validateGetDoctorInfoFromPatientRequest(GetUserByTokenDtoRequest tokenDto) throws ServerException {
-        if (tokenDto.getToken() == null) {
-            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
-        }
-    }
-
-
     public String getDirections(String jsonText) {
         try {
-            GetUserByTokenDtoRequest tokenDto = getClassFromJson(jsonText, GetUserByTokenDtoRequest.class);
+            GetTokenDtoResponse tokenDto = getClassFromJson(jsonText, GetTokenDtoResponse.class);
             validateGetDirectionsRequest(tokenDto);
             Patient patient = getPatientByToken(tokenDto.getToken());
             return gson.toJson(new GetDirectionsOnePatient(patientDao.getDirections( patient)));
@@ -53,36 +47,20 @@ public class PatientService {
         }
     }
 
-    private void validateGetDirectionsRequest(GetUserByTokenDtoRequest tokenDto) throws ServerException {
-        if (tokenDto.getToken() == null) {
-            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
-        }
-    }
-
-
     public String getDrug(String jsonText) {
         try {
-            GetUserByTokenDtoRequest tokenDto = getClassFromJson(jsonText, GetUserByTokenDtoRequest.class);
+            GetTokenDtoResponse tokenDto = getClassFromJson(jsonText, GetTokenDtoResponse.class);
             validateGetDrugRequest(tokenDto);
 
             Patient patient = getPatientByToken(tokenDto.getToken());
 
-            List<Drug> list =  patientDao.getDrug(patient);
             List<DrugDto> listDto = new ArrayList<>();
+            patientDao.getDrug(patient).forEach(drug -> listDto.add(new DrugDto(drug.getName())));
 
-            for (Drug drug : list) {
-                listDto.add(new DrugDto(drug.getName()));
-            }
             return gson.toJson(new GetDrugListDtoResponse(listDto));
 
         } catch (ServerException serverException) {
             return gson.toJson(new ErrorResponse(serverException.getErrorMessage()));
-        }
-    }
-
-    private void validateGetDrugRequest(GetUserByTokenDtoRequest tokenDto) throws ServerException {
-        if (tokenDto.getToken() == null) {
-            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
         }
     }
 
@@ -99,13 +77,17 @@ public class PatientService {
         }
     }
 
-    private void validateGetInfo(GetInfoUserDtoRequest patient) throws ServerException {
-        if (patient.getToken() == null) {
-            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+
+    private Patient getPatientByToken(String token) throws ServerException {
+        User patient;
+        if (!(patient =  patientDao.getByTokenPatient(token)).getClass().equals(Patient.class)) {
+            throw new ServerException(AnswerErrorCode.TOKEN_ERROR);
         }
+        return (Patient) patient;
     }
 
-    //Распарсили строку Json с проверкой на синтаксическую ошибку
+
+
     public <T> T getClassFromJson(String jsonRequest, Class<T> tClass) throws ServerException {
         try {
             return gson.fromJson(jsonRequest, tClass);
@@ -114,12 +96,30 @@ public class PatientService {
         }
     }
 
-    private Patient getPatientByToken(String token) throws ServerException {
-        Patient patient;
-        if (!(patient = (Patient) patientDao.getByTokenPatient(token)).getClass().equals(Patient.class)) {
-            throw new ServerException(AnswerErrorCode.TOKEN_ERROR);
+
+    private void validateGetDoctorInfoFromPatientRequest(GetTokenDtoResponse tokenDto) throws ServerException {
+        if (tokenDto.getToken() == null) {
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
         }
-        return patient;
+    }
+
+
+    private void validateGetDirectionsRequest(GetTokenDtoResponse tokenDto) throws ServerException {
+        if (tokenDto.getToken() == null) {
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+        }
+    }
+
+    private void validateGetDrugRequest(GetTokenDtoResponse tokenDto) throws ServerException {
+        if (tokenDto.getToken() == null) {
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+        }
+    }
+
+    private void validateGetInfo(GetInfoUserDtoRequest patient) throws ServerException {
+        if (patient.getToken() == null) {
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+        }
     }
 
 }

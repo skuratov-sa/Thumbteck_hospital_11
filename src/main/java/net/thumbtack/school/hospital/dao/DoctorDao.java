@@ -17,6 +17,8 @@ public interface DoctorDao {
 
     Collection<Patient> getPatientListByDoctor(Doctor doctor) throws ServerException;
 
+    List<Patient> getPatientListByDrug(String drug) throws ServerException;
+
     void deleteDoctor(Doctor doctor) throws ServerException;
 
     List<Patient> getDoctorToPatientWithDisease(Doctor doctor, String diseaseClient) throws ServerException;
@@ -37,9 +39,11 @@ public interface DoctorDao {
 
     void addDestination(Patient patient, String destination) throws ServerException;
 
-    ArrayList<Doctor> getAllPatientAllDoctors() throws ServerException;
+    List<Patient> getAllPatient();
 
     void delDrugFromDoctor(Patient patient, Drug drug);
 
     void clear();
+
+
 }

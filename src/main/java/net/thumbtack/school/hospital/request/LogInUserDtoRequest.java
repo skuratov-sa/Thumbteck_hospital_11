@@ -1,8 +1,8 @@
 package net.thumbtack.school.hospital.request;
 
 public class LogInUserDtoRequest {
-    private String login;
-    private String password;
+    private final String login;
+    private final String password;
 
     public LogInUserDtoRequest(String login, String password) {
         this.login = login;
@@ -13,16 +13,8 @@ public class LogInUserDtoRequest {
         return login;
     }
 
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
     public String getPassword() {
         return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
 }

@@ -1,22 +1,27 @@
 package net.thumbtack.school.hospital.request;
 
-public class RegistrationPatientDtoRequest {
+import net.thumbtack.school.hospital.response.DrugDto;
+
+public class RegistrationPatientWithDrugDtoRequest {
     private  String firstName;
     private  String lastName;
     private  String diseaseName;
     private  String login;
     private  String password;
     private  String tokenDoc;
+    private  DrugDto drugDto;
 
-    public RegistrationPatientDtoRequest(String firstName, String lastName, String nameDisease, String login, String password, String tokenDoc) {
+    public RegistrationPatientWithDrugDtoRequest(String firstName, String lastName, String nameDisease, String login, String password, String drugDto, String tokenDoc) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.diseaseName = nameDisease;
         this.login = login;
         this.password = password;
         this.tokenDoc = tokenDoc;
+        this.drugDto = new DrugDto(drugDto);
     }
 
+    public DrugDto getDrugDto() { return drugDto; }
 
     public String getFirstName() {
         return firstName;
@@ -64,5 +69,9 @@ public class RegistrationPatientDtoRequest {
 
     public void setTokenDoc(String tokenDoc) {
         this.tokenDoc = tokenDoc;
+    }
+
+    public void setDrugDto(DrugDto drugDto) {
+        this.drugDto = drugDto;
     }
 }

@@ -1,9 +1,9 @@
 package net.thumbtack.school.hospital.request;
 
 public class DelDestinationFromDoctorDtoRequest {
-    private String tokenDoc;
-    private int idPatient;
-    private String destination;
+    private final String tokenDoc;
+    private final int idPatient;
+    private final String destination;
 
     public DelDestinationFromDoctorDtoRequest(String tokenDoc, int idPatient, String destination) {
         this.tokenDoc = tokenDoc;
@@ -15,23 +15,12 @@ public class DelDestinationFromDoctorDtoRequest {
         return tokenDoc;
     }
 
-    public void setTokenDoc(String tokenDoc) {
-        this.tokenDoc = tokenDoc;
-    }
-
     public int getIdPatient() {
         return idPatient;
-    }
-
-    public void setIdPatient(int idPatient) {
-        this.idPatient = idPatient;
     }
 
     public String getDestination() {
         return destination;
     }
 
-    public void setDestination(String destination) {
-        this.destination = destination;
-    }
 }

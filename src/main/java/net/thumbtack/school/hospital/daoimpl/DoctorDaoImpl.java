@@ -46,6 +46,11 @@ public class DoctorDaoImpl implements DoctorDao {
         return DataBase.getInstance().getKeySpecialty();
     }
 
+    @Override
+    public List<Patient> getPatientListByDrug(String drug) throws ServerException {
+        return DataBase.getInstance().getPatientListByDrug(drug);
+    }
+
 
     @Override
     public void deleteDoctor(Doctor token) throws ServerException {
@@ -72,9 +77,10 @@ public class DoctorDaoImpl implements DoctorDao {
         return DataBase.getInstance().getPatientWithDiseaseByDoctor(doctor,diseaseClient);
     }
 
+
     @Override
-    public ArrayList<Doctor> getAllPatientAllDoctors() throws ServerException {
-        return DataBase.getInstance().getAllPatientAllDoctors();
+    public List<Patient> getAllPatient() {
+        return DataBase.getInstance().getAllPatient();
     }
 
     @Override

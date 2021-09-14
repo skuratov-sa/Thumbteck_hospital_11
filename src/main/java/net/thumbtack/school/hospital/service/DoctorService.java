@@ -6,6 +6,8 @@ import net.thumbtack.school.hospital.dao.DoctorDao;
 import net.thumbtack.school.hospital.daoimpl.DoctorDaoImpl;
 import net.thumbtack.school.hospital.exeptions.AnswerErrorCode;
 import net.thumbtack.school.hospital.exeptions.ServerException;
+import net.thumbtack.school.hospital.model.Drug;
+import net.thumbtack.school.hospital.request.GetTokenDtoResponse;
 import net.thumbtack.school.hospital.response.ErrorResponse;
 import net.thumbtack.school.hospital.model.Doctor;
 import net.thumbtack.school.hospital.model.Patient;
@@ -27,26 +29,13 @@ public class DoctorService {
             validateRegDoctor(regDtoDoc);
 
             Doctor newDoctor = new Doctor(regDtoDoc.getFirstName(), regDtoDoc.getLastName(), regDtoDoc.getSpeciality(), regDtoDoc.getLogin(), regDtoDoc.getPassword());
-            return gson.toJson(new GetTokenDtoResponse(doctorDao.registerDoctor(newDoctor)));
+            return gson.toJson(new net.thumbtack.school.hospital.response.GetTokenDtoResponse(doctorDao.registerDoctor(newDoctor)));
 
         } catch (ServerException serverException) {
             return gson.toJson(new ErrorResponse(serverException.getErrorMessage()));
         }
     }
 
-    private void validateRegDoctor(RegistrationDoctorDtoRequest doctor) throws ServerException {
-        if (!Pattern.matches("([a-zA-Z]{2,})", doctor.getFirstName()) || !Pattern.matches("([a-zA-Z]{2,})", doctor.getLastName()) || !Pattern.matches("([A-Za-z]{4,})", doctor.getSpeciality())) {
-            throw new ServerException(AnswerErrorCode.REGISTRATION_WRONG_VOLIDATE_PERSONAL_DATA);
-        }
-
-        if (!(Pattern.matches("[A-Za-z0-9]{3,20}@[a-z]{2,6}[.][a-z]{2,4}", doctor.getLogin()))) {
-            throw new ServerException(AnswerErrorCode.REGISTRATION_WRONG_VOLIDATE_LOGIN);
-        }
-
-        if (!(Pattern.matches("(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}", doctor.getPassword()))) {
-            throw new ServerException(AnswerErrorCode.REGISTRATION_WRONG_VOLIDATE_PASSWORD);
-        }
-    }
 
     public String delDoctor(String tokenJson) {
         try {
@@ -89,11 +78,6 @@ public class DoctorService {
         }
     }
 
-    private void validateDelDoctorRequest(DelDoctorDtoRequest delDto) throws ServerException {
-        if (delDto.getToken() == null) {
-            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
-        }
-    }
 
     public String addDestination(String jsonText) {
         try {
@@ -115,13 +99,6 @@ public class DoctorService {
         }
     }
 
-
-    private void validateAddDestinationRequest(AddDestinationFromDoctorDtoRequest addDestDto) throws ServerException {
-        if (addDestDto.getTokenDoc() == null || addDestDto.getDestination() == null || addDestDto.getIdPatient() == -1) {
-            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
-        }
-    }
-
     public String delDestination(String jsonText) {
         try {
             DelDestinationFromDoctorDtoRequest dto = getClassFromJson(jsonText, DelDestinationFromDoctorDtoRequest.class);
@@ -138,12 +115,6 @@ public class DoctorService {
         }
     }
 
-    private void validateDelDestinationRequest(DelDestinationFromDoctorDtoRequest dto) throws ServerException {
-        if (dto.getTokenDoc() != null && dto.getDestination() == null || dto.getIdPatient() == -1) {
-            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
-        }
-    }
-
     public String addDrugFrom(String jsonText) {
         try {
             AddDrugDtoRequest addDrugDto = getClassFromJson(jsonText, AddDrugDtoRequest.class);
@@ -154,7 +125,7 @@ public class DoctorService {
 
             Patient patient = getPatientById(addDrugDto.getIdPatient());
 
-            doctorDao.addDrugFromDoctor(patient, addDrugDto.getDrug());
+            doctorDao.addDrugFromDoctor(patient, new Drug(addDrugDto.getDrug().getName()));
             return gson.toJson(new EmptyResponse());
 
         } catch (ServerException serverException) {
@@ -162,11 +133,6 @@ public class DoctorService {
         }
     }
 
-    private void validateAddDrugRequest(AddDrugDtoRequest addDrugDto) throws ServerException {
-        if (addDrugDto.getToken() == null || addDrugDto.getDrug() == null || addDrugDto.getIdPatient() == -1) {
-            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
-        }
-    }
 
     public String delDrug(String jsonText) {
         try {
@@ -175,12 +141,13 @@ public class DoctorService {
             //if such a doctor exists
             getDoctorByToken(dto.getTokenDoc());
             Patient patient = getPatientById(dto.getIdPatient());
+            Drug drug = new Drug(dto.getDrug().getName());
 
-            if (!patient.getDrugList().contains(dto.getDrug())) {
+            if (!patient.getDrugList().contains(drug)) {
                 throw new ServerException(AnswerErrorCode.ERROR_DRUG);
             }
 
-            doctorDao.delDrugFromDoctor(patient, dto.getDrug());
+            doctorDao.delDrugFromDoctor(patient, drug);
             return gson.toJson(new EmptyResponse());
 
         } catch (ServerException serverException) {
@@ -188,11 +155,6 @@ public class DoctorService {
         }
     }
 
-    private void validateDelDrugRequest(DelDrugFromDoctorDtoRequest dto) throws ServerException {
-        if (dto.getTokenDoc() == null || dto.getDrug() == null || dto.getIdPatient() == -1) {
-            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
-        }
-    }
 
     //PATIENT
     public String regPatient(String jsonText) {
@@ -212,22 +174,24 @@ public class DoctorService {
         }
     }
 
-    private void validateRegPatientRequest(RegistrationPatientDtoRequest patient) throws ServerException {
-        if (!Pattern.matches("([a-zA-Z]{2,})", patient.getFirstName()) || !Pattern.matches("([a-zA-Z]{2,})", patient.getLastName()) || !Pattern.matches("([A-Za-z]{4,})", patient.getDiseaseName())) {
-            throw new ServerException(AnswerErrorCode.REGISTRATION_WRONG_VOLIDATE_PERSONAL_DATA);
-        }
 
-        if (!(Pattern.matches("[A-Za-z0-9]{3,20}@[a-z]{2,6}[.][a-z]{2,4}", patient.getLogin()))) {
-            throw new ServerException(AnswerErrorCode.REGISTRATION_WRONG_VOLIDATE_LOGIN);
-        }
+    public String regPatientWithDrug(String jsonText) {
+        try {
+            RegistrationPatientWithDrugDtoRequest regDto = getClassFromJson(jsonText,RegistrationPatientWithDrugDtoRequest.class);
+            validateRegPatientWithDrug(regDto);
 
-        if (!(Pattern.matches("(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}", patient.getPassword()))) {
-            throw new ServerException(AnswerErrorCode.REGISTRATION_WRONG_VOLIDATE_PASSWORD);
-        }
-        if (patient.getTokenDoc() == null) {
-            throw new ServerException(AnswerErrorCode.TOKEN_ERROR);
+            Patient patient = new Patient(regDto.getFirstName(),regDto.getLastName(),regDto.getDiseaseName(),regDto.getLogin(),regDto.getPassword());
+            patient.setDrugList(new Drug(regDto.getDrugDto().getName()));
+            Doctor doctor = getDoctorByToken(regDto.getTokenDoc());
+
+            doctorDao.registerPatient(doctor, patient);
+            return gson.toJson(new EmptyResponse());
+
+        }catch (ServerException serverException){
+            return gson.toJson(new ErrorResponse(serverException.getErrorMessage()));
         }
     }
+
 
     public String delPatient(String jsonText) {
         try {
@@ -245,12 +209,6 @@ public class DoctorService {
         }
     }
 
-    private void validateDelPatientRequest(DelPatientDtoRequest delPatientDtoRequest) throws ServerException {
-        if (delPatientDtoRequest.getTokenDoc() == null || delPatientDtoRequest.getIdPatient() == -1) {
-            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
-        }
-    }
-
 
     public String getListPatientsFromDoctor(String textJson) {
         try {
@@ -259,23 +217,14 @@ public class DoctorService {
 
             Doctor doctor = getDoctorByToken(dto.getToken());
 
-            List<Patient> list = (ArrayList<Patient>) doctorDao.getPatientListByDoctor( doctor);
             List<PatientDto> dtoList = new ArrayList<>();
-            for (Patient patient : list) {
-                dtoList.add(new PatientDto(patient));
-            }
+            doctorDao.getPatientListByDoctor(doctor).forEach(patient -> dtoList.add(new PatientDto(patient)));
+
             return gson.toJson(new GetListPatientResponse(dtoList));
 
         } catch (ServerException serverException) {
             return gson.toJson(new ErrorResponse(serverException.getErrorMessage()));
         }
-    }
-
-    private void validateGetListPatientsFromDoctorRequest(GetListPatientDtoRequest dto) throws ServerException {
-        if (dto.getToken() == null) {
-            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
-        }
-
     }
 
     public String getDoctorToPatientWithDisease(String textJson) {
@@ -285,22 +234,13 @@ public class DoctorService {
 
             Doctor doctor = getDoctorByToken(dto.getToken());
 
-            List<Patient> list = doctorDao.getDoctorToPatientWithDisease( doctor, dto.getDisease());
             List<PatientDto> dtoList = new ArrayList<>();
+            doctorDao.getDoctorToPatientWithDisease(doctor,dto.getDisease()).forEach(patient -> dtoList.add(new PatientDto(patient)));
 
-            for (Patient patient : list) {
-                dtoList.add(new PatientDto(patient));
-            }
             return gson.toJson(new GetListPatientResponse(dtoList));
 
         } catch (ServerException serverException) {
             return gson.toJson(new ErrorResponse(serverException.getErrorMessage()));
-        }
-    }
-
-    private void validateGetDoctorToPatientWithDiseaseRequest(GetPatientOnDiseaseDtoRequest dto) throws ServerException {
-        if (dto.getDisease() == null || dto.getToken() == null) {
-            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
         }
     }
 
@@ -313,10 +253,8 @@ public class DoctorService {
 
             List<Patient> list = doctorDao.getDoctorToPatientWithDirections(doctor, getPatientDto.getDirections());
             List<PatientDto> dtoList = new ArrayList<>();
+            list.forEach(patient -> dtoList.add(new PatientDto(patient)));
 
-            for (Patient patient : list) {
-                dtoList.add(new PatientDto(patient));
-            }
             return gson.toJson(new GetListPatientResponse(dtoList));
 
         } catch (ServerException serverException) {
@@ -325,39 +263,41 @@ public class DoctorService {
 
     }
 
-    private void validateGetDoctorToPatientWithDirections(GetPatientOnDirectionsDtoRequest getPatientDto) throws ServerException {
-        if (getPatientDto.getToken() == null || getPatientDto.getDirections() == null) {
-            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
-        }
-
-    }
-
     public String doctorGetAllPatientAllDoctors(String textJson) {
         try {
-            GetUserByTokenDtoRequest dto = getClassFromJson(textJson, GetUserByTokenDtoRequest.class);
+            GetTokenDtoResponse dto = getClassFromJson(textJson, GetTokenDtoResponse.class);
             validateDoctorGetAllPatientAllDoctorsRequest(dto);
 
             //if such a doctor exists
             getDoctorByToken(dto.getToken());
 
-            List<PatientInfoDtoRequest> listPatientInfo  = new ArrayList<>();
-            for (Doctor doctorOne :  doctorDao.getAllPatientAllDoctors()) {
-                for (Patient patient: doctorOne.getPatients()) {
-                    listPatientInfo.add(new PatientInfoDtoRequest(new PatientDto(patient), doctorOne.getFirstName(), doctorOne.getLastName()));
-                }
-            }
-            return gson.toJson(new DoctorGetAllPatientAllDoctorsResponse(listPatientInfo));
+            List<PatientDto> patientInfo = new ArrayList<>();
+           doctorDao.getAllPatient().forEach(patient -> patientInfo.add(new PatientDto(patient)));
+
+            return gson.toJson(new DoctorGetAllPatientAllDoctorsResponse(patientInfo));
 
         } catch (ServerException serverException) {
             return gson.toJson(new ErrorResponse(serverException.getErrorMessage()));
         }
     }
 
-    private void validateDoctorGetAllPatientAllDoctorsRequest(GetUserByTokenDtoRequest dto) throws ServerException {
-        if (dto.getToken() == null) {
-            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+    public String getPatientListByDrug(String jsonText){
+        try {
+            GetPatientListByDrugDtoRequest dto = getClassFromJson(jsonText,GetPatientListByDrugDtoRequest.class);
+            validateGetPatientListByDrug(dto);
+            //if such a doctor exists
+            getDoctorByToken(dto.getToken());
+
+            List<Patient> list = doctorDao.getPatientListByDrug(dto.getDrugName());
+            List<PatientDto> dtoList = new ArrayList<>();
+            list.forEach(patient -> dtoList.add(new PatientDto(patient)));
+
+            return gson.toJson(new GetPatientListByDrugResponse(dtoList));
+        } catch (ServerException e) {
+            return gson.toJson(new ErrorResponse(e.getErrorMessage()));
         }
     }
+
 
     public String doctorGetAllPatientsWithDisease(String textJson) {
         try {
@@ -366,14 +306,8 @@ public class DoctorService {
             //if such a doctor exists
             getDoctorByToken(dto.getToken());
 
-            List<PatientInfoDtoRequest> patientInfo = new ArrayList<>();
-            for (Doctor doctorOne : doctorDao.getAllPatientAllDoctors()) {
-                for (Patient patient: doctorOne.getPatients()) {
-                    if(patient.getDiseaseName().equals(dto.getDisease())) {
-                        patientInfo.add(new PatientInfoDtoRequest(new PatientDto(patient), doctorOne.getFirstName(), doctorOne.getLastName()));
-                    }
-                }
-            }
+            List<PatientDto> patientInfo = new ArrayList<>();
+            doctorDao.getAllPatient().forEach(patient -> patientInfo.add(new PatientDto(patient)));
 
             return gson.toJson(new DoctorGetAllPatientAllDoctorsResponse(patientInfo));
         } catch (ServerException serverException) {
@@ -381,11 +315,6 @@ public class DoctorService {
         }
     }
 
-    private void validateDoctorGetAllPatientsWithDiseaseRequest(DoctorGetAllPatientsWithDiseaseDtoRequest dto) throws ServerException {
-        if (dto.getToken() == null && dto.getDisease() == null) {
-            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
-        }
-    }
 
     //Распарсили строку Json с проверкой на синтаксическую ошибку
     public <T> T getClassFromJson(String jsonRequest, Class<T> tClass) throws ServerException {
@@ -406,13 +335,145 @@ public class DoctorService {
             validateGetInfo(dto);
 
             User user = doctorDao.getByToken(dto.getToken());
-            if (!user.getClass().equals(Doctor.class)) {
-                throw new ServerException(AnswerErrorCode.TOKEN_ERROR);
-            }
             return gson.toJson(new DoctorDto((Doctor) user));
 
         } catch (ServerException serverException) {
             return gson.toJson(new ErrorResponse(serverException.getErrorMessage()));
+        }
+    }
+
+
+    private Patient getPatientById(int idPatient) throws ServerException {
+        User patient;
+        if (!(patient =  doctorDao.getUserById(idPatient)).getClass().equals(Patient.class)) {
+            throw new ServerException(AnswerErrorCode.PATIENT_ID_ERROR);
+        }
+        return (Patient) patient;
+    }
+
+
+    private Doctor getDoctorByToken(String tokenDoc) throws ServerException {
+        User doctor;
+        if (!(doctor = doctorDao.getByToken(tokenDoc)).getClass().equals(Doctor.class) ) {
+            throw new ServerException(AnswerErrorCode.TOKEN_ERROR);
+        }
+        return (Doctor) doctor;
+    }
+
+
+    private void validateRegDoctor(RegistrationDoctorDtoRequest doctor) throws ServerException {
+        if (!Pattern.matches("([a-zA-Z]{2,})", doctor.getFirstName()) || !Pattern.matches("([a-zA-Z]{2,})", doctor.getLastName()) || !Pattern.matches("([A-Za-z]{4,})", doctor.getSpeciality())) {
+            throw new ServerException(AnswerErrorCode.REGISTRATION_WRONG_VOLIDATE_PERSONAL_DATA);
+        }
+
+        if (!(Pattern.matches("[A-Za-z0-9]{3,20}@[a-z]{2,6}[.][a-z]{2,4}", doctor.getLogin()))) {
+            throw new ServerException(AnswerErrorCode.REGISTRATION_WRONG_VOLIDATE_LOGIN);
+        }
+
+        if (!(Pattern.matches("(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}", doctor.getPassword()))) {
+            throw new ServerException(AnswerErrorCode.REGISTRATION_WRONG_VOLIDATE_PASSWORD);
+        }
+    }
+
+    private void validateDelDoctorRequest(DelDoctorDtoRequest delDto) throws ServerException {
+        if (delDto.getToken() == null) {
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+        }
+    }
+
+    private void validateAddDestinationRequest(AddDestinationFromDoctorDtoRequest addDestDto) throws ServerException {
+        if (addDestDto.getTokenDoc() == null || addDestDto.getDestination() == null || addDestDto.getIdPatient() == -1) {
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+        }
+    }
+
+    private void validateDelDestinationRequest(DelDestinationFromDoctorDtoRequest dto) throws ServerException {
+        if (dto.getTokenDoc() != null && dto.getDestination() == null || dto.getIdPatient() == -1) {
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+        }
+    }
+
+    private void validateAddDrugRequest(AddDrugDtoRequest addDrugDto) throws ServerException {
+        if (addDrugDto.getToken() == null || addDrugDto.getDrug() == null) {
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+        }
+    }
+
+    private void validateDelDrugRequest(DelDrugFromDoctorDtoRequest dto) throws ServerException {
+        if (dto.getTokenDoc() == null || dto.getDrug() == null || dto.getIdPatient() == -1) {
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+        }
+    }
+
+    private void validateRegPatientRequest(RegistrationPatientDtoRequest patient) throws ServerException {
+        if (!Pattern.matches("([a-zA-Z]{2,})", patient.getFirstName()) || !Pattern.matches("([a-zA-Z]{2,})", patient.getLastName()) || !Pattern.matches("([A-Za-z]{4,})", patient.getDiseaseName())) {
+            throw new ServerException(AnswerErrorCode.REGISTRATION_WRONG_VOLIDATE_PERSONAL_DATA);
+        }
+
+        if (!(Pattern.matches("[A-Za-z0-9]{3,20}@[a-z]{2,6}[.][a-z]{2,4}", patient.getLogin()))) {
+            throw new ServerException(AnswerErrorCode.REGISTRATION_WRONG_VOLIDATE_LOGIN);
+        }
+
+        if (!(Pattern.matches("(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}", patient.getPassword()))) {
+            throw new ServerException(AnswerErrorCode.REGISTRATION_WRONG_VOLIDATE_PASSWORD);
+        }
+        if (patient.getTokenDoc() == null) {
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+        }
+    }
+
+
+    private void validateRegPatientWithDrug(RegistrationPatientWithDrugDtoRequest patient) throws ServerException {
+        validateRegPatientRequest(new RegistrationPatientDtoRequest(patient.getFirstName(),
+                patient.getLastName(),patient.getDiseaseName(),
+                patient.getLogin(),patient.getPassword(),patient.getTokenDoc()));
+
+        if(patient.getDrugDto().getName() == null || patient.getDrugDto().getName().length() == 0){
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+        }
+
+    }
+
+    private void validateDelPatientRequest(DelPatientDtoRequest delPatientDtoRequest) throws ServerException {
+        if (delPatientDtoRequest.getTokenDoc() == null || delPatientDtoRequest.getIdPatient() == -1) {
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+        }
+    }
+
+    private void validateGetListPatientsFromDoctorRequest(GetListPatientDtoRequest dto) throws ServerException {
+        if (dto.getToken() == null) {
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+        }
+
+    }
+
+    private void validateGetDoctorToPatientWithDiseaseRequest(GetPatientOnDiseaseDtoRequest dto) throws ServerException {
+        if (dto.getDisease() == null || dto.getToken() == null) {
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+        }
+    }
+
+    private void validateGetDoctorToPatientWithDirections(GetPatientOnDirectionsDtoRequest getPatientDto) throws ServerException {
+        if (getPatientDto.getToken() == null || getPatientDto.getDirections() == null) {
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+        }
+    }
+
+    private void validateDoctorGetAllPatientAllDoctorsRequest(GetTokenDtoResponse dto) throws ServerException {
+        if (dto.getToken() == null) {
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+        }
+    }
+
+    private void validateGetPatientListByDrug(GetPatientListByDrugDtoRequest dto) throws ServerException {
+        if(dto.getDrugName() == null || dto.getToken() == null){
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
+        }
+    }
+
+    private void validateDoctorGetAllPatientsWithDiseaseRequest(DoctorGetAllPatientsWithDiseaseDtoRequest dto) throws ServerException {
+        if (dto.getToken() == null || dto.getDisease() == null) {
+            throw new ServerException(AnswerErrorCode.NULL_REQUEST);
         }
     }
 
@@ -422,20 +483,4 @@ public class DoctorService {
         }
     }
 
-
-    private Patient getPatientById(int idPatient) throws ServerException {
-        Patient patient;
-        if (!(patient = (Patient) doctorDao.getUserById(idPatient)).getClass().equals(Patient.class)) {
-            throw new ServerException(AnswerErrorCode.PATIENT_ID_ERROR);
-        }
-        return patient;
-    }
-
-    private Doctor getDoctorByToken(String tokenDoc) throws ServerException {
-        Doctor doctor;
-        if (!(doctor = (Doctor) doctorDao.getByToken(tokenDoc)).getClass().equals(Doctor.class) ) {
-            throw new ServerException(AnswerErrorCode.TOKEN_ERROR);
-        }
-        return doctor;
-    }
 }

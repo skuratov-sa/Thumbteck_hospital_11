@@ -17,6 +17,7 @@ public class DataBase implements Serializable {
 
     private static DataBase dataBase;
 
+    // REVU сначала поля, потом остальное
     private DataBase() {
         counterId = 1;
     }
@@ -32,6 +33,8 @@ public class DataBase implements Serializable {
     private final Map<Integer, User> idToUser = new HashMap<>();
     private final DualHashBidiMap<String, User> tokenToUser = new DualHashBidiMap<>();
     private final MultiValuedMap<String, Doctor> doctorBySpeciality = new HashSetValuedHashMap<>();
+    private final MultiValuedMap<String,Patient> patientIdByDrug = new HashSetValuedHashMap<>();
+    private final MultiValuedMap<String,Patient> patientIdByDisease = new HashSetValuedHashMap<>();
     private final Map<String, User> loginToUser = new HashMap<>();
     private int counterId;
 
@@ -107,6 +110,7 @@ public class DataBase implements Serializable {
 
     public void addDrugPatient( Patient patient, Drug drug) throws ServerException {
         patient.setDrugList(drug);
+        patientIdByDrug.put(drug.getName(),patient);
         idToUser.replace(patient.getId(), patient);
     }
 
@@ -116,6 +120,7 @@ public class DataBase implements Serializable {
 
     public void delDrug(Patient patient, Drug drug) {
         patient.removeDrug(drug);
+        patientIdByDrug.get(drug.getName()).remove(patient);
         idToUser.replace(patient.getId(), patient);
     }
 
@@ -132,17 +137,23 @@ public class DataBase implements Serializable {
         tokenToUser.put(token, patient);
         loginToUser.put(patient.getLogin(), patient);
         doctor.getPatients().add(patient);
+        for (Drug drug: patient.getDrugList()) {
+            patientIdByDrug.put(drug.getName(),patient);
+        }
+        patientIdByDisease.put(patient.getDiseaseName(),patient);
         counterId++;
     }
 
 
     //Доктор удоляет клиента
     public void deletePatient(Doctor doctor, Patient patient) throws ServerException {
-        if (idToUser.remove(patient.getId()) == null) {
-            throw new ServerException(AnswerErrorCode.TOKEN_ERROR);
-        }
+        idToUser.remove(patient.getId());
         idToUser.remove(patient.getId());
         doctor.getPatients().remove(patient);
+        for (Drug drug: patient.getDrugList()) {
+            patientIdByDrug.get(drug.getName()).remove(patient);
+        }
+        patientIdByDisease.get(patient.getDiseaseName()).remove(patient);
     }
 
     public List<Patient> getListPatientsByDoctor(Doctor doctor) {
@@ -169,11 +180,15 @@ public class DataBase implements Serializable {
         return ans;
     }
 
-    public ArrayList<Doctor> getAllPatientAllDoctors() throws ServerException {
+    public List<Doctor> getAllPatientAllDoctors() throws ServerException {
         return new ArrayList<>(doctorBySpeciality.values());
     }
 
-
+    public List<Patient> getPatientListByDrug(String drugName) {
+        List<Patient> ans = new ArrayList<>();
+        patientIdByDrug.get(drugName).iterator().forEachRemaining(ans::add);
+        return ans;
+    }
 
     //Пациент просматривает  своего доктора
     public Doctor getDoctorInfoFromPatient(Patient patient) throws ServerException {
@@ -202,10 +217,7 @@ public class DataBase implements Serializable {
         return user;
     }
 
-    public List<Doctor> getSpecialtyToDoctor(String specialty) throws ServerException {
-        if (doctorBySpeciality.get(specialty) == null) {
-            throw new ServerException(AnswerErrorCode.ERROR_SPECIALITY);
-        }
+    public List<Doctor> getSpecialtyToDoctor(String specialty) {
         List<Doctor> list = new ArrayList<>();
         doctorBySpeciality.get(specialty).iterator().forEachRemaining(list::add);
         return list;
@@ -218,8 +230,13 @@ public class DataBase implements Serializable {
     public void clear() {
         tokenToUser.clear();
         idToUser.clear();
+        patientIdByDrug.clear();
         doctorBySpeciality.clear();
+        patientIdByDisease.clear();
         loginToUser.clear();
     }
 
+    public List<Patient> getAllPatient() {
+        return new ArrayList<>(patientIdByDisease.values());
+    }
 }
