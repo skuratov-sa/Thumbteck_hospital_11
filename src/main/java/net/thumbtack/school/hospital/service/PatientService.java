@@ -9,7 +9,7 @@ import net.thumbtack.school.hospital.model.User;
 import net.thumbtack.school.hospital.request.GetInfoUserDtoRequest;
 import net.thumbtack.school.hospital.response.*;
 import net.thumbtack.school.hospital.model.Doctor;
-import net.thumbtack.school.hospital.model.Drug;
+
 import net.thumbtack.school.hospital.model.Patient;
 import net.thumbtack.school.hospital.request.GetTokenDtoResponse;
 
